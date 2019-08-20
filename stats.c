@@ -39,4 +39,41 @@ void main() {
                               201,   6,  12,  60,   8,   2,   5,  67,
                                 7,  87, 250, 230,  99,   3, 100,  90};
 
+  print_statistics(test, SIZE);
+
+}
+
+void print_statistics(unsigned char* arr, unsigned int n)
+{
+	
+}
+
+void print_array(unsigned char* arr, unsigned int n)
+{
+	
+}
+
+unsigned char find_median(unsigned char* arr, unsigned int n)
+{
+	
+}
+
+unsigned char find_mean(unsigned char* arr, unsigned int n)
+{
+	
+}
+
+unsigned char find_maximum(unsigned char* arr, unsigned int n)
+{
+	
+}
+
+unsigned char find_minimum(unsigned char* arr, unsigned int n)
+{
+	
+}
+
+unsigned char* sort_array(unsigned char* arr, unsigned int n)
+{
+	
 }
