@@ -10,7 +10,7 @@
 #*****************************************************************************
 
 #------------------------------------------------------------------------------
-# Make File For Assesment 2
+# Make File For The Final Assesment
 #
 # Use: make [TARGET] [PLATFORM-OVERRIDES]
 #
@@ -29,63 +29,77 @@
 #      SPECS - Specs file to give the linker
 #
 #------------------------------------------------------------------------------
+
+
+PLATFORM = HOST
+
 include sources.mk
+COURSE = COURSE1
+VERBOSE = VERBOSE
 
-# Platform Overrides
-PLATFORM ?= HOST
-
-LINKER_FILE = ../msp432p401r.lds
-LDFLAGS = -Wl,-Map=$(BASENAME).map -T -$(LINKER_FILE)
-CPPFLAGs = -MD -MP
+LINKER_FILE = msp432p401r.lds
 CPU = cortex-m4
 ARCH = armv7e-m
-BASENAME = c1m2
 SPECS = nosys.specs
-ARCHFLAGS = -mcpu=$(CPU) -mthumb -march$(ARCH) -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=$(SPECS)
+
+
+TARGET = FinalAss
+
+CC = gcc
+LD = ld
+
+COMMON_FLAGS = -Wall -g -O0 -std=c99 $(INCLUDES) -D$(COURSE) -D$(VERBOSE)
 
 ifeq ($(PLATFORM),HOST)
-	INCLUDES = -I../include/common
-	CC = gcc
-	LDFLAGS = -Xlinker -Map=$(BASENAME).map
-	CFLAGS = -DHOST -Wall -g -O0 -std=c99 $(INCLUDES)
-	SOURCES = main.c memory.c
-	OBJDUMP = objdump -d
-
-else
-	# Architectures Specific Flags
-	CC = arm-none-eabi-gcc
-	OBJDUMP = arm-none-eabi-objdump -d
-	CFLAGS = $(ARCHFLAGS) -DMSP432 -Wall -Werror -g -O0 -std=c99 $(INCLUDES) -nonstdlib 
-
+  CC = gcc
+  LD = ld
+  OBJDUMP = objdump
+  SIZE = size
+  MY_CPPFLAGS = $(COMMON_FLAGS) -E -DHOST
+  CFLAGS = $(COMMON_FLAGS) -MD -MP -DHOST
+  LDFLAGS = -Wl,-Map=$(TARGET).map
 endif
 
-OBJS =$(SOURCES:.c=.o)
-DEPS = $(SOURCE:.c=.d)
+ifeq ($(PLATFORM),MSP432)
+  CC = arm-none-eabi-gcc
+  LD = arm-none-eabi-ld
+  OBJDUMP = arm-none-eabi-objdump
+  SIZE = arm-none-eabi-size
+  MY_CPPFLAGS = $(COMMON_FLAGS) -E -DMSP432
+  CFLAGS = $(COMMON_FLAGS) -mcpu=$(CPU) -march=$(ARCH) -mthumb -mfloat-abi=hard\
+   -mfpu=fpv4-sp-d16 --specs=$(SPECS) -MD -MP -DMSP432
+  LDFLAGS = -Wl,-Map=$(TARGET).map -T $(LINKER_FILE) -mfloat-abi=hard --specs=$(SPECS)
+endif
+
+PRES = $(SOURCES:.c=.i)
+OBJS = $(SOURCES:.c=.o)
+
+%.i : src/%.c
+	$(CC) $(MY_CPPFLAGS) -o src/$@ $<
+
+%.asm : src/%.o
+	$(OBJDUMP) -S $< > src/$@
+
+$(TARGET).out.asm: $(TARGET).out
+	$(OBJDUMP) -S $< > src/$@
 
 .PHONY: compile-all
 compile-all: $(OBJS)
+	echo $(OBJS)
+
+%.o : src/%.c
+	$(CC) -c $< $(CFLAGS) -o src/$@
 
 .PHONY: build
-build: $(OBJS) $(DEPS)
-	$(CC) $(OBJS) $(CFLAGS) $(LDFLAGS) -o $(BASENAME).out
-	size $(OBJS)
+build: all
+
+.PHONY: all
+all: $(TARGET).out
+
+$(TARGET).out: $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) -o $@ && $(SIZE) -Atd $(TARGET).out
 
 .PHONY: clean
 clean:
-	rm *.o *.d *.i *.asm *.out *.map
-
-%.o : %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
-
-%.asm : %.c
-	$(CC) -E $< $(CFLAGS) -o $@
-	$(CC) $(SOURCES) $(CFLAGS) $(LDFLAGS) -o $(BASENAME).out
-	$(OBJDUMP) $(BASENAME).out
-
-%.d : %.c
-	$(CC) -MM $(CFLAGS) $*.c > $*.d
-
-%.map: $(OBJS)
-	$(CC) -T $(OBJS) $(LDFLAGS) $(BASENAME).map
-	
+	rm -f src/*.o src/*.i *.out *.map src/*.d src/*.asm
 

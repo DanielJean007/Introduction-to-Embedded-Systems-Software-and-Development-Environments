@@ -15,13 +15,16 @@
  * This header file provides an abstraction of reading and
  * writing to memory via function calls. 
  *
- * @author Alex Fosdick
- * @date April 1 2017
+ * @author Mark Attia
+ * @date September 4 2019
  *
  */
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
+#include <inttypes.h>
+#include <stddef.h>
+#include <stdlib.h>
 /**
  * @brief Sets a value of a data array 
  *
@@ -89,5 +92,92 @@ void set_all(char * ptr, char value, unsigned int size);
  * @return void.
  */
 void clear_all(char * ptr, unsigned int size);
+
+/**
+ * @brief Moves data from one place to another
+ *
+ *
+ * @param src Pointer to data array
+ * @param dst pointer to the destination
+ * @param length Number of elements to move
+ *
+ * @return Pointer to the desination.
+ */
+uint8_t* my_memmove(uint8_t* src, uint8_t* dst, size_t length);
+
+
+/**
+ * @brief Copies data from one place to another
+ *
+ *
+ * @param src Pointer to data array
+ * @param dst pointer to the destination
+ * @param length Number of elements to copy
+ *
+ * @return Pointer to the desination.
+ */
+
+uint8_t* my_memcopy(uint8_t* src, uint8_t* dst, size_t length);
+
+
+/**
+ * @brief Sets data array elements to a value
+ *
+ * Given a pointer to a char data set, this will set a number of elements
+ * from a provided data array to the given value. The length is determined
+ * by the provided length parameter.
+ *
+ * @param src Pointer to data array
+ * @param value value to write the the locaiton
+ * @param length Number of elements to set to value
+ *
+ * @return Pointer to the array's first element.
+ */
+uint8_t* my_memset(uint8_t* src, size_t length, uint8_t value);
+
+
+/**
+ * @brief Sets data array elements to zero
+ *
+ * Given a pointer to a char data set, this will set a number of elements
+ * from a provided data array to zero. The length is determined
+ * by the provided length parameter.
+ *
+ * @param src Pointer to data array
+ * @param length Number of elements to set to zero
+ *
+ * @return Pointer to the array's first element.
+ */
+uint8_t* my_memzero(uint8_t* src, size_t length);
+
+
+/**
+ * @brief reverses elements in memory
+ *
+ * @param src Pointer to data array
+ * @param length Number of elements to reverse
+ *
+ * @return Pointer to the array's first element.
+ */
+uint8_t* my_reverse(uint8_t* src, size_t length);
+
+
+/**
+ * @brief reserves a place in memory
+ *
+ * @param length Number of elements to reserve a place for
+ *
+ * @return Pointer to the array's first element.
+ */
+int32_t* reserve_words(size_t length);
+
+
+/**
+ * @brief frees a place in memory
+ *
+ *
+ * @return void.
+ */
+void free_words(int32_t* src);
 
 #endif /* __MEMORY_H__ */
